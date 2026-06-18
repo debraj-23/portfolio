@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DEBRAJ SOM | Java Developer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --bg2: #111;
+            --card: #181818;
+            --border: #2a2a2a;
+            --yellow: #FFD700;
+            --ydim: #cc9900;
+            --yglow: rgba(255,215,0,0.12);
+            --yglow2: rgba(255,215,0,0.25);
+            --t1: #e8e8e8;
+            --t2: #999;
+            --t3: #555;
+            --pixel: 'Press Start 2P', monospace;
+            --retro: 'VT323', monospace;
+            --body: 'Rajdhani', sans-serif;
+        }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        html{scroll-behavior:smooth;}
+        body{background:var(--bg);color:var(--t1);font-family:var(--body);overflow-x:hidden;}
+        ::-webkit-scrollbar{width:5px;}
+        ::-webkit-scrollbar-track{background:var(--bg2);}
+        ::-webkit-scrollbar-thumb{background:var(--ydim);border-radius:3px;}
+
+        /* SCANLINES */
+        .scanlines{position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.04) 2px,rgba(0,0,0,0.04) 4px);pointer-events:none;z-index:999;}
+
+        /* PARTICLES */
+        #cv{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:0.35;}
+
+        /* INTRO */
+        #intro{position:fixed;inset:0;background:#000;z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.5rem;transition:opacity .8s,visibility .8s;}
+        #intro.gone{opacity:0;visibility:hidden;}
+        .i-logo{font-family:var(--pixel);font-size:clamp(1rem,3.5vw,2.2rem);color:var(--yellow);text-shadow:0 0 20px var(--yellow),0 0 50px rgba(255,215,0,.4);animation:glitch 4s infinite;text-align:center;letter-spacing:.08em;}
+        .i-sub{font-family:var(--retro);font-size:clamp(1.1rem,2.5vw,1.6rem);color:#666;letter-spacing:.25em;text-align:center;}
+        .i-ver{font-family:var(--retro);font-size:1rem;color:#333;letter-spacing:.2em;}
+        .i-btn{font-family:var(--pixel);font-size:.55rem;color:var(--yellow);letter-spacing:.15em;animation:blink 1.2s step-end infinite;cursor:pointer;margin-top:1.5rem;}
+        .i-btn:hover{color:#fff;}
+
+        /* NAV */
+        #nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,10,10,.97);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:.7rem 2rem;display:flex;align-items:center;justify-content:space-between;}
+        .n-brand{font-family:var(--pixel);font-size:.5rem;color:var(--yellow);text-shadow:0 0 8px var(--yellow);letter-spacing:.1em;}
+        .n-links{display:flex;gap:.2rem;list-style:none;}
+        .n-links a{font-family:var(--pixel);font-size:.35rem;color:var(--t2);text-decoration:none;padding:.35rem .55rem;border:1px solid transparent;border-radius:2px;transition:all .2s;letter-spacing:.05em;}
+        .n-links a:hover,.n-links a.active{color:var(--yellow);border-color:var(--yellow);background:var(--yglow);}
+
+        /* MAIN */
+        main{position:relative;z-index:1;padding-top:56px;}
+
+        /* SECTION */
+        .sec{padding:4.5rem 2rem;max-width:1100px;margin:0 auto;}
+        .sh{display:flex;align-items:center;gap:1rem;margin-bottom:2.5rem;}
+        .sh-lbl{font-family:var(--pixel);font-size:.38rem;color:var(--t3);letter-spacing:.2em;}
+        .sh-ttl{font-family:var(--pixel);font-size:clamp(.65rem,2vw,.95rem);color:var(--yellow);text-shadow:0 0 12px rgba(255,215,0,.35);letter-spacing:.1em;}
+        .sh-line{flex:1;height:1px;background:linear-gradient(to right,var(--ydim),transparent);}
+
+        /* HERO */
+        #hero{min-height:calc(100vh - 56px);display:flex;align-items:center;padding:2rem;max-width:100%;}
+        .hero-wrap{max-width:1100px;margin:0 auto;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:3.5rem;align-items:center;}
+        .h-tag{font-family:var(--pixel);font-size:.4rem;color:var(--yellow);letter-spacing:.3em;margin-bottom:1.2rem;display:flex;align-items:center;gap:.5rem;}
+        .h-tag::before{content:'▶';animation:blink 1s step-end infinite;}
+        .h-name{font-family:var(--pixel);font-size:clamp(1.1rem,3.5vw,2rem);color:var(--t1);line-height:1.7;margin-bottom:.4rem;}
+        .h-name span{color:var(--yellow);text-shadow:0 0 18px var(--yellow);}
+        .h-class{font-family:var(--retro);font-size:clamp(1.3rem,2.5vw,1.9rem);color:#666;letter-spacing:.2em;margin-bottom:1.8rem;}
+        .h-bio{font-size:1.05rem;color:var(--t2);line-height:1.8;margin-bottom:2rem;max-width:460px;}
+        .h-btns{display:flex;gap:.8rem;flex-wrap:wrap;}
+        .btn-y{font-family:var(--pixel);font-size:.4rem;color:#000;background:var(--yellow);border:none;padding:.75rem 1.4rem;cursor:pointer;letter-spacing:.08em;transition:all .2s;text-decoration:none;display:inline-block;clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px));}
+        .btn-y:hover{background:#fff;box-shadow:0 0 20px var(--yellow);}
+        .btn-o{font-family:var(--pixel);font-size:.4rem;color:var(--yellow);background:transparent;border:1px solid var(--yellow);padding:.75rem 1.4rem;cursor:pointer;letter-spacing:.08em;transition:all .2s;text-decoration:none;display:inline-block;clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px));}
+        .btn-o:hover{background:var(--yglow);box-shadow:0 0 15px var(--yglow2);}
+
+        /* CHARACTER PANEL */
+        .char-panel{background:var(--card);border:1px solid var(--border);padding:1.8rem;position:relative;}
+        .char-panel::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(to right,var(--yellow),var(--ydim),transparent);}
+        .cp-title{font-family:var(--pixel);font-size:.45rem;color:var(--yellow);letter-spacing:.15em;margin-bottom:1.3rem;padding-bottom:.7rem;border-bottom:1px solid var(--border);}
+        .avatar{width:72px;height:72px;background:var(--bg2);border:2px solid var(--ydim);margin:0 auto 1.3rem;display:flex;align-items:center;justify-content:center;font-size:2.2rem;clip-path:polygon(10% 0%,90% 0%,100% 10%,100% 90%,90% 100%,10% 100%,0% 90%,0% 10%);}
+        .lv-label{text-align:center;font-family:var(--pixel);font-size:.38rem;color:var(--yellow);margin-bottom:.2rem;}
+        .lv-class{text-align:center;font-family:var(--retro);font-size:1.15rem;color:#666;letter-spacing:.2em;margin-bottom:1.3rem;}
+        .sr{display:flex;justify-content:space-between;align-items:center;padding:.45rem 0;border-bottom:1px solid var(--border);font-size:.95rem;}
+        .sr:last-of-type{border-bottom:none;}
+        .sl{color:var(--t2);font-weight:600;font-size:.88rem;letter-spacing:.04em;}
+        .sv{color:var(--t1);font-weight:600;font-size:.9rem;}
+        .sv.y{color:var(--yellow);}
+        .xp-wrap{margin-top:1.3rem;}
+        .xp-lbl{display:flex;justify-content:space-between;font-size:.82rem;color:var(--t2);margin-bottom:.35rem;}
+        .xp-bg{height:7px;background:var(--bg2);border:1px solid var(--border);border-radius:2px;overflow:hidden;}
+        .xp-fill{height:100%;background:linear-gradient(to right,var(--ydim),var(--yellow));width:0%;transition:width 1.5s ease;box-shadow:0 0 7px var(--yellow);}
+        .rpg-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem;margin-top:1.2rem;}
+        .rg-item{text-align:center;padding:.5rem .3rem;background:var(--bg2);border:1px solid var(--border);}
+        .rg-ab{font-family:var(--pixel);font-size:.33rem;color:var(--yellow);display:block;margin-bottom:.2rem;}
+        .rg-v{font-family:var(--retro);font-size:1.4rem;color:var(--t1);}
+
+        /* SKILLS */
+        .skills-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:1.3rem;}
+        .sc{background:var(--card);border:1px solid var(--border);padding:1.4rem;position:relative;overflow:hidden;}
+        .sc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(to right,var(--yellow),transparent);}
+        .sc-title{font-family:var(--pixel);font-size:.4rem;color:var(--yellow);letter-spacing:.08em;margin-bottom:1.1rem;display:flex;align-items:center;gap:.5rem;}
+        .si{margin-bottom:.72rem;}
+        .si-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:.28rem;}
+        .si-n{font-size:.92rem;font-weight:600;color:var(--t1);}
+        .si-l{font-family:var(--pixel);font-size:.32rem;color:var(--ydim);}
+        .sb{height:5px;background:var(--bg2);border:1px solid var(--border);border-radius:1px;overflow:hidden;}
+        .sbf{height:100%;background:linear-gradient(to right,#666,var(--yellow));width:0%;transition:width 1.2s ease;box-shadow:0 0 5px rgba(255,215,0,.45);}
+
+        /* QUEST LOG */
+        .ql{position:relative;}
+        .ql::before{content:'';position:absolute;left:20px;top:0;bottom:0;width:1px;background:linear-gradient(to bottom,var(--ydim),transparent);}
+        .qe{padding-left:55px;position:relative;margin-bottom:2.2rem;opacity:0;transform:translateX(-20px);transition:all .5s ease;}
+        .qe.vis{opacity:1;transform:translateX(0);}
+        .qm{position:absolute;left:10px;top:2px;width:20px;height:20px;background:var(--yellow);clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%);}
+        .qc{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--ydim);padding:1.4rem;}
+        .qt{font-family:var(--pixel);font-size:.5rem;color:var(--yellow);letter-spacing:.05em;margin-bottom:.35rem;}
+        .qg{font-size:1rem;color:var(--t2);font-weight:600;margin-bottom:.7rem;letter-spacing:.04em;}
+        .qp{display:inline-block;font-family:var(--pixel);font-size:.33rem;color:#000;background:var(--ydim);padding:.22rem .5rem;margin-bottom:.9rem;letter-spacing:.05em;}
+        .qa{list-style:none;}
+        .qa li{font-size:.97rem;font-weight:400;color:var(--t2);line-height:1.7;padding:.28rem 0 .28rem 1.1rem;border-bottom:1px solid rgba(42,42,42,.5);position:relative;}
+        .qa li::before{content:'▸';color:var(--ydim);position:absolute;left:0;font-size:.7rem;}
+        .qa li:last-child{border-bottom:none;}
+
+        /* PROJECTS */
+        .pg{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.3rem;}
+        .pc{background:var(--card);border:1px solid var(--border);padding:1.4rem;position:relative;transition:all .3s;overflow:hidden;}
+        .pc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(to right,var(--yellow),var(--ydim),transparent);}
+        .pc:hover{border-color:var(--ydim);box-shadow:0 0 22px var(--yglow);transform:translateY(-3px);}
+        .pbadge{display:inline-block;font-family:var(--pixel);font-size:.32rem;color:#000;background:var(--yellow);padding:.18rem .45rem;margin-bottom:.8rem;letter-spacing:.08em;}
+        .pyear{position:absolute;top:.9rem;right:.9rem;font-family:var(--pixel);font-size:.3rem;color:var(--t3);}
+        .ptitle{font-family:var(--pixel);font-size:.46rem;color:var(--t1);line-height:1.9;margin-bottom:.7rem;letter-spacing:.04em;}
+        .pclient{font-size:.85rem;color:#666;margin-bottom:.8rem;font-style:italic;}
+        .pdesc{font-size:.95rem;font-weight:400;color:var(--t2);line-height:1.7;margin-bottom:.9rem;}
+        .tags{display:flex;flex-wrap:wrap;gap:.35rem;}
+        .tag{font-family:var(--pixel);font-size:.28rem;color:var(--ydim);background:rgba(255,215,0,.07);border:1px solid rgba(255,215,0,.18);padding:.18rem .45rem;letter-spacing:.04em;}
+
+        /* ACHIEVEMENTS */
+        .ag{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.1rem;}
+        .ac{background:var(--card);border:1px solid var(--border);padding:1.2rem;text-align:center;transition:all .3s;position:relative;overflow:hidden;}
+        .ac.ul{border-color:var(--ydim);}
+        .ac.ul::before{content:'UNLOCKED';position:absolute;top:.35rem;right:.35rem;font-family:var(--pixel);font-size:.25rem;color:#000;background:var(--yellow);padding:.12rem .28rem;}
+        .ac:hover{box-shadow:0 0 18px var(--yglow);transform:translateY(-2px);}
+        .a-icon{font-size:2.2rem;margin-bottom:.7rem;display:block;}
+        .a-name{font-family:var(--pixel);font-size:.36rem;color:var(--yellow);letter-spacing:.08em;margin-bottom:.35rem;line-height:1.9;}
+        .a-desc{font-size:.88rem;color:#666;line-height:1.5;}
+
+        /* EDUCATION */
+        .eg{display:grid;gap:.9rem;}
+        .ec{background:var(--card);border:1px solid var(--border);padding:1.4rem;display:grid;grid-template-columns:auto 1fr auto;gap:1.4rem;align-items:center;transition:all .3s;}
+        .ec:hover{border-color:var(--ydim);box-shadow:0 0 14px var(--yglow);}
+        .e-icon{font-size:1.9rem;width:46px;text-align:center;}
+        .e-deg{font-family:var(--pixel);font-size:.4rem;color:var(--yellow);letter-spacing:.04em;margin-bottom:.35rem;line-height:1.9;}
+        .e-inst{font-size:.97rem;color:var(--t2);font-weight:600;}
+        .e-sc{font-family:var(--retro);font-size:1.7rem;color:var(--yellow);text-align:right;white-space:nowrap;}
+        .e-yr{font-size:.82rem;color:var(--t3);text-align:right;}
+
+        /* CONTACT */
+        .cg{display:grid;grid-template-columns:1fr 1fr;gap:1.8rem;align-items:start;}
+        .ci-list{display:flex;flex-direction:column;gap:.9rem;}
+        .ci{display:flex;align-items:center;gap:1rem;padding:.9rem 1.1rem;background:var(--card);border:1px solid var(--border);transition:all .3s;text-decoration:none;}
+        .ci:hover{border-color:var(--ydim);box-shadow:0 0 14px var(--yglow);transform:translateX(4px);}
+        .ci-icon{font-size:1.4rem;color:var(--yellow);min-width:28px;}
+        .ci-lbl{font-family:var(--pixel);font-size:.33rem;color:var(--t3);letter-spacing:.1em;margin-bottom:.25rem;}
+        .ci-val{font-size:.97rem;font-weight:600;color:var(--t1);}
+        .ctag{padding:1.8rem;background:var(--card);border:1px solid var(--border);border-left:3px solid var(--yellow);}
+        .ctag p{font-family:var(--retro);font-size:1.4rem;color:var(--t1);line-height:1.7;letter-spacing:.04em;}
+        .ctag span{color:var(--yellow);}
+
+        /* FOOTER */
+        footer{padding:1.8rem;text-align:center;border-top:1px solid var(--border);background:var(--bg2);}
+        footer p{font-family:var(--pixel);font-size:.33rem;color:var(--t3);letter-spacing:.1em;}
+        footer span{color:var(--yellow);}
+
+        /* FADE-IN */
+        .fi{opacity:0;transform:translateY(18px);transition:opacity .6s ease,transform .6s ease;}
+        .fi.vis{opacity:1;transform:translateY(0);}
+
+        /* ANIMATIONS */
+        @keyframes glitch{
+            0%,88%,100%{text-shadow:0 0 20px var(--yellow),0 0 45px rgba(255,215,0,.45);transform:translate(0);}
+            89%{text-shadow:-2px 0 #f00,2px 0 #00f;transform:translate(-2px);}
+            91%{text-shadow:2px 0 #f00,-2px 0 #00f;transform:translate(2px);}
+            93%{text-shadow:0 0 20px var(--yellow);transform:translate(0);}
+        }
+        @keyframes blink{0%,100%{opacity:1;}50%{opacity:0;}}
+
+        /* RESPONSIVE */
+        @media(max-width:768px){
+            .hero-wrap{grid-template-columns:1fr;gap:2rem;}
+            .cg{grid-template-columns:1fr;}
+            .n-links{display:none;}
+            .ec{grid-template-columns:auto 1fr;}
+            .e-sc,.e-yr{display:none;}
+            .sec{padding:3rem 1.2rem;}
+        }
+        @media(max-width:480px){
+            .pg,.skills-grid,.ag{grid-template-columns:1fr;}
+        }
+    </style>
+</head>
+<body>
+
+<div class="scanlines"></div>
+<canvas id="cv"></canvas>
+
+<!-- INTRO -->
+<div id="intro">
+    <div class="i-logo">DEBRAJ SOM</div>
+    <div class="i-sub">// JAVA DEVELOPER · PAYMENT SYSTEMS · GENAI</div>
+    <div class="i-ver">v3.5 · KOLKATA, INDIA · 2026</div>
+    <div class="i-btn" id="ibtn">[ PRESS ENTER OR CLICK TO BEGIN ]</div>
+</div>
+
+<!-- NAV -->
+<nav id="nav">
+    <div class="n-brand">DEBRAJ.SOM</div>
+    <ul class="n-links">
+        <li><a href="#hero">HOME</a></li>
+        <li><a href="#skills">SKILLS</a></li>
+        <li><a href="#experience">QUESTS</a></li>
+        <li><a href="#projects">PROJECTS</a></li>
+        <li><a href="#achievements">ACHIEVEMENTS</a></li>
+        <li><a href="#education">ORIGIN</a></li>
+        <li><a href="#contact">CONTACT</a></li>
+    </ul>
+</nav>
+
+<main>
+
+<!-- HERO -->
+<div id="hero">
+    <div class="hero-wrap">
+        <div>
+            <div class="h-tag">PLAYER ONE · JAVA DEVELOPER</div>
+            <h1 class="h-name">DEBRAJ<br><span>SOM</span></h1>
+            <div class="h-class">// PAYMENT SYSTEMS WARRIOR</div>
+            <p class="h-bio">Java Developer with 4 years building secure, scalable payment and banking systems. Specialist in Java, Spring Boot, Microservices, MySQL and GenAI-driven development. Currently raiding Cognizant's payment platforms.</p>
+            <div class="h-btns">
+                <a href="#contact" class="btn-y">CONTACT HERO</a>
+                <a href="#experience" class="btn-o">VIEW QUEST LOG</a>
+            </div>
+        </div>
+        <div class="char-panel">
+            <div class="cp-title">[ CHARACTER PROFILE ]</div>
+            <div class="avatar">⚔️</div>
+            <div class="lv-label">LVL 7 · ASSOCIATE</div>
+            <div class="lv-class">JAVA ARCHITECT CLASS</div>
+            <div class="sr"><span class="sl">CLASS</span><span class="sv y">Java Developer</span></div>
+            <div class="sr"><span class="sl">GUILD</span><span class="sv">Cognizant</span></div>
+            <div class="sr"><span class="sl">EXP</span><span class="sv y">4 Years</span></div>
+            <div class="sr"><span class="sl">LOCATION</span><span class="sv">Kolkata, India</span></div>
+            <div class="sr"><span class="sl">SPECIAL</span><span class="sv y">GenAI Wielder</span></div>
+            <div class="xp-wrap">
+                <div class="xp-lbl"><span>CAREER XP</span><span>LVL 7 → 8</span></div>
+                <div class="xp-bg"><div class="xp-fill" data-w="75"></div></div>
+            </div>
+            <div class="rpg-grid">
+                <div class="rg-item"><span class="rg-ab">STR</span><span class="rg-v">92</span></div>
+                <div class="rg-item"><span class="rg-ab">INT</span><span class="rg-v">95</span></div>
+                <div class="rg-item"><span class="rg-ab">DEX</span><span class="rg-v">88</span></div>
+                <div class="rg-item"><span class="rg-ab">WIS</span><span class="rg-v">85</span></div>
+                <div class="rg-item"><span class="rg-ab">CHA</span><span class="rg-v">80</span></div>
+                <div class="rg-item"><span class="rg-ab">LCK</span><span class="rg-v">90</span></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SKILLS -->
+<section id="skills" class="sec">
+    <div class="sh fi">
+        <div><div class="sh-lbl">// CHAPTER II</div><div class="sh-ttl">SKILL TREE</div></div>
+        <div class="sh-line"></div>
+    </div>
+    <div class="skills-grid">
+        <div class="sc fi">
+            <div class="sc-title">⚔️ BACKEND &amp; LANGUAGES</div>
+            <div class="si"><div class="si-h"><span class="si-n">Java</span><span class="si-l">LVL MAX</span></div><div class="sb"><div class="sbf" data-w="95"></div></div></div>
+            <div class="si"><div class="si-h"><span class="si-n">Spring Boot</span><span class="si-l">LVL 9</span></div><div class="sb"><div class="sbf" data-w="92"></div></div></div>
+            <div class="si"><div class="si-h"><span class="si-n">Spring Security</span><span class="si-l">LVL 8</span></div><div class="sb"><div class="sbf" data-w="85"></div></div></div>
+            <div class="si"><div class="si-h"><span class="si-n">Spring MVC</span><span class="si-l">LVL 8</span></div><div class="sb"><div class="sbf" data-w="85"></div></div></div>
+            <div class="si"><div class="si-h"><span class="si-n">Groovy / Bash</span><span class="si-l">LVL 6</span></div><div class="sb"><div class="sbf" data-w="65"></div></div></div>
+        </div>
+        <div class="sc fi">
+            <div class="sc-title">🏗️ ARCHITECTURE</div>
+            <div class="si"><div class="si-h"><span class="si-n">Microservices</span><span class="si-l">LVL 9</span></div><div class="sb"><div class="sbf" data-w="90"></div></div></div>
+            <div class="si"><div class="si-h"><span class="si-n">RESTful APIs</span><span class="si-l">LVL 9</span></div><div class="sb"><div class="sbf" data-w="92"></div></div></div>
+            <div class="si"><div class="si-h"><span class="si-n">Design Patterns</span><span class="si-l">LVL 8</span></div><div class="sb"><div class="sbf" data-w="82"></div></div></div>
+            <div class="si"><div class="si-h"><span class="si-n">Distributed Systems</span><span class="si-l">LVL 8</span></div><div class="sb"><div class="sbf" data-w="80"></div></div></div>
+        </div>
+        <div class="sc fi">
+            <div class="sc-title">🗄️ DATABASE</div>
+            <div class="si"><div class="si-h"><span class="si-n">MySQL</span><span class="si-l">LVL 8</span></div><div class="sb"><div class="sbf" data-w="85"></div></div></div>
+            <div class="si"><div class="si-h"><span class="si-n">DB2 Enterprise</span><span class="si-l">LVL 8</span></div><div class="sb"><div class="sbf" data-w="82"></div></div></div>
+            <div class="si"><div class="si-h"><span class="si-n">MongoDB</span><span class="si-l">LVL 6</span></div><div class="sb"><div class="sbf" data-w="65"></div></div></div>
+            <div class="si"><div class="si-h"><span class="si-n">Query Tuning / SQL</span><span class="si-l">LVL 8</span></div><div class="sb"><div class="sbf" data-w="83"></div></div></div>
+        </div>
+        <div class="sc fi">
+            <div class="sc-title">🤖 GENAI &amp; AGENTIC AI</div>
+            <div class="si"><div class="si-h"><span class="si-n">Claude Code</span><span class="si-l">LVL 8</span></div><div class="sb"><div class="sbf" data-w="82"></div></div></div>
+            <div class="si"><div class="si-h"><span class="si-n">GitHub Copilot</span><span class="si-l">LVL 8</span></div><div class="sb"><div class="sbf" data-w="80"></div></div></div>
+            <div class="si"><div class="si-h"><span class="si-n">LLM / Agentic AI</span><span class="si-l">LVL 7</span></div><div class="sb"><div class="sbf" data-w="75"></div></div></div>
+            <div class="si"><div class="si-h"><span class="si-n">Prompt Engineering</span><span class="si-l">LVL 7</span></div><div class="sb"><div class="sbf" data-w="75"></div></div></div>
+        </div>
+        <div class="sc fi">
+            <div class="sc-title">🛡️ SECURITY &amp; DEVOPS</div>
+            <div class="si"><div class="si-h"><span class="si-n">PCI-DSS / CSRF</span><span class="si-l">LVL 8</span></div><div class="sb"><div class="sbf" data-w="83"></div></div></div>
+            <div class="si"><div class="si-h"><span class="si-n">Snyk / Checkmarx</span><span class="si-l">LVL 7</span></div><div class="sb"><div class="sbf" data-w="75"></div></div></div>
+            <div class="si"><div class="si-h"><span class="si-n">GitHub Actions / Jenkins</span><span class="si-l">LVL 7</span></div><div class="sb"><div class="sbf" data-w="78"></div></div></div>
+            <div class="si"><div class="si-h"><span class="si-n">AWS</span><span class="si-l">LVL 6</span></div><div class="sb"><div class="sbf" data-w="68"></div></div></div>
+        </div>
+        <div class="sc fi">
+            <div class="sc-title">⚡ FRONTEND &amp; TESTING</div>
+            <div class="si"><div class="si-h"><span class="si-n">React.js</span><span class="si-l">LVL 7</span></div><div class="sb"><div class="sbf" data-w="72"></div></div></div>
+            <div class="si"><div class="si-h"><span class="si-n">JavaScript ES6+</span><span class="si-l">LVL 7</span></div><div class="sb"><div class="sbf" data-w="75"></div></div></div>
+            <div class="si"><div class="si-h"><span class="si-n">JUnit / Mockito</span><span class="si-l">LVL 8</span></div><div class="sb"><div class="sbf" data-w="85"></div></div></div>
+            <div class="si"><div class="si-h"><span class="si-n">TDD / BDD</span><span class="si-l">LVL 7</span></div><div class="sb"><div class="sbf" data-w="78"></div></div></div>
+        </div>
+    </div>
+</section>
+
+<!-- EXPERIENCE -->
+<section id="experience" class="sec">
+    <div class="sh fi">
+        <div><div class="sh-lbl">// CHAPTER III</div><div class="sh-ttl">QUEST LOG</div></div>
+        <div class="sh-line"></div>
+    </div>
+    <div class="ql">
+        <div class="qe">
+            <div class="qm"></div>
+            <div class="qc">
+                <div class="qt">[ MAIN QUEST · ACTIVE ]</div>
+                <div class="qg">Associate — Cognizant, Kolkata</div>
+                <span class="qp">OCT 2024 – PRESENT</span>
+                <ul class="qa">
+                    <li>Developed a configurable multi-threaded Java batch microservice to backfill 450 days of payment data (900+ crore records), enabling parallel processing, fault-tolerant retries, and zero data loss during large-scale production migrations.</li>
+                    <li>Developed SAML-based MFA for 100k+ client onboarding portals, reducing unauthorised access by 60%.</li>
+                    <li>Strengthened PCI-DSS compliance through encryption services, CSRF remediation, and pen-test findings resolution.</li>
+                    <li>Built GitHub Actions + Snyk DevSecOps pipeline to automate SCA/SAST scanning on every code push.</li>
+                    <li>Migrated a legacy Grails/GSP application to React.js using Claude Code + Figma MCP Server agentic workflow.</li>
+                    <li>Handled critical production escalations on live payment systems including RCA, incident resolution, stakeholder reporting.</li>
+                    <li>Mentored peers on GenAI tooling adoption, code quality standards, and agentic AI development practices.</li>
+                </ul>
+            </div>
+        </div>
+        <div class="qe">
+            <div class="qm"></div>
+            <div class="qc">
+                <div class="qt">[ COMPLETED QUEST ]</div>
+                <div class="qg">Programmer Analyst — Cognizant, Kolkata</div>
+                <span class="qp">AUG 2022 – SEPT 2024</span>
+                <ul class="qa">
+                    <li>Implemented idempotent processing and retry mechanisms ensuring reliability across distributed payment workflows.</li>
+                    <li>Designed and developed Spring Boot microservices for client onboarding and payment processing platforms.</li>
+                    <li>Handled large-volume transaction processing with optimized backend logic and fine-tuned SQL queries.</li>
+                    <li>Owned end-to-end feature development in Agile Scrum — Git, Gradle CI/CD, GitHub Actions, Jenkins.</li>
+                    <li>Improved API performance and response times through efficient request handling and caching strategies.</li>
+                    <li>Conducted peer code reviews ensuring quality, reusability, and adherence to design patterns.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- PROJECTS -->
+<section id="projects" class="sec">
+    <div class="sh fi">
+        <div><div class="sh-lbl">// CHAPTER IV</div><div class="sh-ttl">EPIC QUESTS</div></div>
+        <div class="sh-line"></div>
+    </div>
+    <div class="pg">
+        <div class="pc fi">
+            <div class="pbadge">LEGENDARY</div>
+            <div class="pyear">2026</div>
+            <div class="ptitle">AI-DRIVEN APP<br>MODERNISATION</div>
+            <div class="pclient">Cognizant Internal Innovation POC</div>
+            <div class="pdesc">Migrated a legacy Grails/GSP application to React.js using agentic AI workflows — Claude Code with Figma MCP server for automated design-to-code generation. Appreciated internally for demonstrating production-viable GenAI pipelines.</div>
+            <div class="tags">
+                <span class="tag">Claude Code</span><span class="tag">MCP Server</span><span class="tag">React.js</span><span class="tag">Figma</span><span class="tag">GenAI</span><span class="tag">Agentic AI</span>
+            </div>
+        </div>
+        <div class="pc fi">
+            <div class="pbadge">EPIC</div>
+            <div class="pyear">2025</div>
+            <div class="ptitle">DEVSECOPS<br>AUTOMATION PIPELINE</div>
+            <div class="pclient">US Payment Processing Client</div>
+            <div class="pdesc">Built automated security scanning pipeline using GitHub Actions with Snyk SCA and SAST. Shifted security left in the SDLC — reduced vulnerability detection time and strengthened DevSecOps posture for a live payment platform serving 100k+ clients.</div>
+            <div class="tags">
+                <span class="tag">GitHub Actions</span><span class="tag">Snyk</span><span class="tag">CI/CD</span><span class="tag">Java</span><span class="tag">Spring Boot</span>
+            </div>
+        </div>
+        <div class="pc fi">
+            <div class="pbadge">EPIC</div>
+            <div class="pyear">2025</div>
+            <div class="ptitle">CENTRALISED<br>MICROSERVICES OBSERVABILITY</div>
+            <div class="pclient">Cognizant Internal Innovation POC</div>
+            <div class="pdesc">Designed a centralised logging and observability solution for distributed microservices using Kafka-based log streaming. Enabled real-time monitoring and reduced MTTR for production incidents.</div>
+            <div class="tags">
+                <span class="tag">Java</span><span class="tag">Kafka</span><span class="tag">Spring Boot</span><span class="tag">Microservices</span><span class="tag">Observability</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ACHIEVEMENTS -->
+<section id="achievements" class="sec">
+    <div class="sh fi">
+        <div><div class="sh-lbl">// CHAPTER V</div><div class="sh-ttl">ACHIEVEMENTS</div></div>
+        <div class="sh-line"></div>
+    </div>
+    <div class="ag">
+        <div class="ac ul fi"><span class="a-icon">🏛️</span><div class="a-name">CLAUDE CODE<br>ARCHITECT</div><div class="a-desc">Claude Code Architect Foundation Certified</div></div>
+        <div class="ac ul fi"><span class="a-icon">☁️</span><div class="a-name">CLOUD<br>PRACTITIONER</div><div class="a-desc">AWS Certified Cloud Practitioner</div></div>
+        <div class="ac ul fi"><span class="a-icon">🤖</span><div class="a-name">VIBE CODING<br>CERTIFIED</div><div class="a-desc">AI Tools Cert — GitHub Copilot &amp; prompt-driven engineering</div></div>
+        <div class="ac ul fi"><span class="a-icon">💎</span><div class="a-name">SAPPHIRE<br>AWARD</div><div class="a-desc">Cognizant Sapphire Award for outstanding contribution</div></div>
+        <div class="ac ul fi"><span class="a-icon">🌟</span><div class="a-name">EMERGING<br>TALENT</div><div class="a-desc">Cognizant Emerging Talent Award</div></div>
+        <div class="ac ul fi"><span class="a-icon">🔐</span><div class="a-name">PCI-DSS<br>GUARDIAN</div><div class="a-desc">Strengthened PCI-DSS compliance across live payment platforms</div></div>
+        <div class="ac ul fi"><span class="a-icon">🛡️</span><div class="a-name">60% BREACH<br>REDUCTION</div><div class="a-desc">SAML MFA integration cut unauthorized access by 60%</div></div>
+        <div class="ac ul fi"><span class="a-icon">🧬</span><div class="a-name">GENAI<br>PIONEER</div><div class="a-desc">Pioneered production-viable agentic AI workflows at Cognizant</div></div>
+    </div>
+</section>
+
+<!-- EDUCATION -->
+<section id="education" class="sec">
+    <div class="sh fi">
+        <div><div class="sh-lbl">// CHAPTER VI</div><div class="sh-ttl">ORIGIN STORY</div></div>
+        <div class="sh-line"></div>
+    </div>
+    <div class="eg">
+        <div class="ec fi">
+            <div class="e-icon">🎓</div>
+            <div><div class="e-deg">B.TECH — COMPUTER SCIENCE &amp; ENGINEERING</div><div class="e-inst">BP Poddar Institute of Management and Technology, Kolkata</div></div>
+            <div><div class="e-sc">9.04 CGPA</div><div class="e-yr">2022</div></div>
+        </div>
+        <div class="ec fi">
+            <div class="e-icon">📚</div>
+            <div><div class="e-deg">AISSCE — SCIENCE (CBSE CLASS XII)</div><div class="e-inst">Pranvananda Vidyamandir</div></div>
+            <div><div class="e-sc">92%</div><div class="e-yr">2018</div></div>
+        </div>
+        <div class="ec fi">
+            <div class="e-icon">🏫</div>
+            <div><div class="e-deg">AISSE — CBSE CLASS X</div><div class="e-inst">Pranvananda Vidyamandir</div></div>
+            <div><div class="e-sc">10 CGPA</div><div class="e-yr">2016</div></div>
+        </div>
+    </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact" class="sec">
+    <div class="sh fi">
+        <div><div class="sh-lbl">// CHAPTER VII</div><div class="sh-ttl">CONTACT THE HERO</div></div>
+        <div class="sh-line"></div>
+    </div>
+    <div class="cg">
+        <div class="ci-list">
+            <a href="mailto:debrajsom23@gmail.com" class="ci">
+                <span class="ci-icon">✉️</span>
+                <div><div class="ci-lbl">EMAIL</div><div class="ci-val">debrajsom23@gmail.com</div></div>
+            </a>
+            <a href="tel:+919774135120" class="ci">
+                <span class="ci-icon">📱</span>
+                <div><div class="ci-lbl">PHONE</div><div class="ci-val">+91 9774135120</div></div>
+            </a>
+            <a href="https://linkedin.com/in/debraj-som" target="_blank" rel="noopener" class="ci">
+                <span class="ci-icon">💼</span>
+                <div><div class="ci-lbl">LINKEDIN</div><div class="ci-val">linkedin.com/in/debraj-som</div></div>
+            </a>
+            <a href="https://github.com/debraj-23" target="_blank" rel="noopener" class="ci">
+                <span class="ci-icon">🐙</span>
+                <div><div class="ci-lbl">GITHUB</div><div class="ci-val">github.com/debraj-23</div></div>
+            </a>
+            <div class="ci">
+                <span class="ci-icon">📍</span>
+                <div><div class="ci-lbl">LOCATION</div><div class="ci-val">Kolkata, India</div></div>
+            </div>
+        </div>
+        <div class="ctag">
+            <p>"Ready to take on your <span>next epic quest</span>?<br><br>Whether it's building <span>payment systems</span>, architecting <span>microservices</span>, or pioneering <span>GenAI workflows</span> — I'm your warrior."</p>
+        </div>
+    </div>
+</section>
+
+</main>
+
+<footer>
+    <p>DEBRAJ SOM · JAVA DEVELOPER · © 2026 · BUILT WITH <span>♥</span> AND A LOT OF COFFEE</p>
+</footer>
+
+<script>
+// INTRO
+const intro = document.getElementById('intro');
+function dismissIntro() {
+    intro.classList.add('gone');
+    setTimeout(() => intro.style.display = 'none', 800);
+    setTimeout(() => {
+        document.querySelectorAll('.xp-fill').forEach(b => b.style.width = b.dataset.w + '%');
+    }, 600);
+}
+document.getElementById('ibtn').addEventListener('click', dismissIntro);
+document.addEventListener('keydown', e => { if (e.key === 'Enter' && !intro.classList.contains('gone')) dismissIntro(); });
+
+// PARTICLES
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+let pts = [];
+function resize() { cv.width = innerWidth; cv.height = innerHeight; }
+resize();
+window.addEventListener('resize', resize);
+for (let i = 0; i < 90; i++) pts.push({
+    x: Math.random() * innerWidth, y: Math.random() * innerHeight,
+    r: Math.random() * 1.4 + 0.3,
+    vx: (Math.random() - .5) * .25, vy: (Math.random() - .5) * .25,
+    op: Math.random() * .45 + .08,
+    col: Math.random() > .72 ? '#FFD700' : '#555'
+});
+(function loop() {
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    pts.forEach(p => {
+        p.x = (p.x + p.vx + cv.width) % cv.width;
+        p.y = (p.y + p.vy + cv.height) % cv.height;
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = p.col; ctx.globalAlpha = p.op; ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(loop);
+})();
+
+// INTERSECTION OBSERVER
+const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+        if (!e.isIntersecting) return;
+        e.target.classList.add('vis');
+        e.target.querySelectorAll('.sbf').forEach(b => b.style.width = b.dataset.w + '%');
+    });
+}, { threshold: 0.1 });
+document.querySelectorAll('.fi, .qe').forEach(el => obs.observe(el));
+
+// ACTIVE NAV
+const secs = document.querySelectorAll('[id]');
+const links = document.querySelectorAll('.n-links a');
+window.addEventListener('scroll', () => {
+    let cur = '';
+    secs.forEach(s => { if (scrollY >= s.offsetTop - 80) cur = s.id; });
+    links.forEach(a => {
+        a.classList.toggle('active', a.getAttribute('href') === '#' + cur);
+    });
+});
+</script>
+</body>
+</html>
